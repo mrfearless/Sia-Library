@@ -12,12 +12,24 @@
 include shell32.inc
 includelib shell32.lib
 
+include masm32.inc
+includelib masm32.lib
+
 .CODE
+
+;------------------------------------------------------------------------------
+; Sia_CheckConnection
+;------------------------------------------------------------------------------
+Sia_CheckConnection PROC lpszHostAddress:DWORD, lpszPort:DWORD, bSecure:DWORD
+    Invoke RpcCheckConnection, lpszHostAddress, lpszPort, bSecure
+    ret
+Sia_CheckConnection ENDP
+
 
 ;------------------------------------------------------------------------------
 ; Sia_Connect - Connect to SIA Daemon (SIAD)
 ;------------------------------------------------------------------------------
-Sia_Connect PROC lpszHostAddress:DWORD, lpszPort:DWORD
+Sia_Connect PROC lpszHostAddress:DWORD, lpszPort:DWORD, lpdwSiaHandle:DWORD
     LOCAL bFoundSiad:DWORD
     LOCAL nProcess:DWORD
     LOCAL hProcess:DWORD
@@ -82,26 +94,26 @@ Sia_Connect PROC lpszHostAddress:DWORD, lpszPort:DWORD
         ret
     .ENDIF
     
-    Invoke NetConnect, Addr SIAD_ADDRESS, Addr SIAD_PORT, FALSE, Addr SIA_AGENT
+    Invoke RpcConnect, Addr SIAD_ADDRESS, Addr SIAD_PORT, FALSE, Addr SIA_AGENT, Addr lpdwSiaHandle
     ret
 Sia_Connect ENDP
 
 ;------------------------------------------------------------------------------
 ; Sia_Disconnect - Disconnect from SIA Daemon (SIAD)
 ;------------------------------------------------------------------------------
-Sia_Disconnect PROC
-    Invoke NetDisconnect
+Sia_Disconnect PROC hSia:DWORD
+    Invoke RpcDisconnect, hSia
     ret
 Sia_Disconnect ENDP
 
 ;------------------------------------------------------------------------------
 ; Sia_Auth - Prepare Header with Basic Auth for POST calls to SIA API URLs
 ;------------------------------------------------------------------------------
-Sia_Auth PROC lpszApiPassword:DWORD
+Sia_Auth PROC hSia:DWORD, lpszApiPassword:DWORD
     .IF lpszApiPassword == NULL
-        Invoke NetBasicAuth, NULL, Addr SIA_API_PASSWORD
+        Invoke RpcSetAuthBasic, hSia, NULL, Addr SIA_API_PASSWORD
     .ELSE
-        Invoke NetBasicAuth, NULL, lpszApiPassword
+        Invoke RpcSetAuthBasic, hSia, NULL, lpszApiPassword
     .ENDIF
     ret
 Sia_Auth ENDP
@@ -109,7 +121,7 @@ Sia_Auth ENDP
 ;------------------------------------------------------------------------------
 ; Sia_Constants - Get and store SIA constants in a SIACONSTANTS structure
 ;------------------------------------------------------------------------------
-Sia_Constants PROC USES EBX EDX lpStructSiaConstants:DWORD
+Sia_Constants PROC USES EBX EDX hSia:DWORD, lpStructSiaConstants:DWORD
     LOCAL hJSON:DWORD
     
     .IF lpStructSiaConstants == NULL
@@ -119,7 +131,7 @@ Sia_Constants PROC USES EBX EDX lpStructSiaConstants:DWORD
     
     mov hJSON, NULL
     
-    Invoke sia_api_daemon_constants, Addr hJSON
+    Invoke sia_api_daemon_constants, hSia, Addr hJSON
     .IF eax == FALSE
         xor eax, eax
         ret
@@ -293,7 +305,7 @@ Sia_Constants ENDP
 ;------------------------------------------------------------------------------
 ; Sia_Version - Get SIA Daemon version
 ;------------------------------------------------------------------------------
-Sia_Version PROC USES EBX lpszSiadVersion:DWORD
+Sia_Version PROC USES EBX hSia:DWORD, lpszSiadVersion:DWORD
     LOCAL hJSON:DWORD
     
     .IF lpszSiadVersion == NULL
@@ -302,8 +314,7 @@ Sia_Version PROC USES EBX lpszSiadVersion:DWORD
     .ENDIF    
     
     mov hJSON, NULL
-    
-    Invoke sia_api_daemon_version, Addr hJSON
+    Invoke sia_api_daemon_version, hSia, Addr hJSON
     .IF eax == FALSE
         xor eax, eax
         ret
@@ -411,7 +422,15 @@ Sia_FindApiPassword PROC
     ret
 Sia_FindApiPassword ENDP
 
-
+;------------------------------------------------------------------------------
+; Sia_FreeJson - 
+;------------------------------------------------------------------------------
+Sia_FreeJson PROC hJSON:DWORD
+    .IF hJSON != NULL
+        Invoke cJSON_Delete, hJSON
+    .ENDIF
+    ret
+Sia_FreeJson ENDP
 
 
 

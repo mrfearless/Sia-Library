@@ -26,22 +26,22 @@
 ;                    V
 ;  --------------------------------------
 ;  | Functions: sia_api_*               |
-;  | Purpose: Calls SIA_API_* functions |
+;  | Purpose: Calls SIA_RPC_* functions |
 ;  | Files: Api.asm                     |
 ;  --------------------------------------
 ;                    |
 ;                    V
 ;  --------------------------------------
-;  | Functions: SIA_API_*               |
-;  | Purpose: Calls Net* functions      |
+;  | Functions: SIA_RPC_*               |
+;  | Purpose: Calls Rpc* functions      |
 ;  | Files: Api.asm                     |
 ;  --------------------------------------
 ;                    |
 ;                    V
 ;  --------------------------------------
-;  | Functions: Net*                    |
+;  | Functions: Rpc*                    |
 ;  | Purpose: Calls WinInet functions   |
-;  | Files: Net.asm                     |
+;  | Files: Rpc.lib                     |
 ;  --------------------------------------
 ;
 ;
@@ -56,7 +56,7 @@ include \masm32\macros\macros.asm
 ;------------------------------------------------------------------------------
 ; Debugging - comment or remove comments to disable/enable
 ;------------------------------------------------------------------------------
-SIA_API_JSON_TO_LOCALFILE EQU 1 ; GET requests stored locally for debugging 
+
 ;DEBUG32 EQU 1
 ;IFDEF DEBUG32
 ;    PRESERVEXMMREGS equ 1
@@ -78,13 +78,23 @@ Includelib user32.lib
 Include kernel32.inc
 Includelib kernel32.lib
 
-Include libcjson.inc
-Includelib libcjson.lib
+;Include libcjson.inc
+;Includelib libcjson.lib
+
+Include cjson_x86.inc
+Includelib cjson_x86.lib
 
 Include psapi.inc
 Includelib psapi.lib
 
+include RPC.inc
+includelib RPC.lib
+
 Include Sia.inc                 ; Main Sia include file
+
+.CONST
+SIA_MINER_BLOCKHEADER_SIZE      EQU 112d
+
 
 ;------------------------------------------------------------------------------
 ; Data Section
@@ -102,13 +112,15 @@ SIAD_ADDRESSPORT                DB 48 DUP (0)
 SIAD_FILEPATH                   DB MAX_PATH DUP (0) 
 SIA_API_PASSWORD                DB 128 DUP (0)
 
+
+
 ;------------------------------------------------------------------------------
 ; Code section - Wrap all other source files
 ;------------------------------------------------------------------------------
 .CODE
 
-Include Net.asm                 ; Wrapper for WinInet http api functions: Net* functions
-Include Api.asm                 ; Sia low level api functions that call to SIAD url endpoints: SIA_API_* and sia_api_*
+
+Include Api.asm                 ; Sia low level api functions that call to SIAD url endpoints: SIA_RPC_* and sia_api_*
 
 Include Client.asm              ; Sia general functions
 Include Consensus.asm           ; Sia consensus functions
