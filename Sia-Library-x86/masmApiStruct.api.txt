@@ -1,8 +1,8 @@
-;------------------------------------------------------------------------------------------------
+;------------------------------------------------------------------------------
 ; Sia x86 Library
 ;
-; Paste this text at the end of \Radasm\masm\masmApiStruct.api to add these to Radasm
+; Paste this text at the end of \Radasm\masm\masmApiStruct.api to add to Radasm
 ;
-;------------------------------------------------------------------------------------------------
+;------------------------------------------------------------------------------
 SIACONSTANTS,blockfrequency,blocksizelimit,extremefuturethreshold,futurethreshold,genesistimestamp,maturitydelay,mediantimestampwindow,siafundcount,siafundportion,targetwindow,initialcoinbase,minimumcoinbase,roottarget,rootdepth,maxtargetadjustmentup,maxtargetadjustmentdown,siacoinprecision
 

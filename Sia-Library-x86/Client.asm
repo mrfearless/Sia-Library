@@ -111,6 +111,7 @@ Sia_Disconnect ENDP
 ;------------------------------------------------------------------------------
 Sia_Auth PROC hSia:DWORD, lpszApiPassword:DWORD
     .IF lpszApiPassword == NULL
+        Invoke Sia_FindApiPassword
         Invoke RpcSetAuthBasic, hSia, NULL, Addr SIA_API_PASSWORD
     .ELSE
         Invoke RpcSetAuthBasic, hSia, NULL, lpszApiPassword
@@ -418,6 +419,7 @@ Sia_FindApiPassword PROC
         ret
     .ENDIF
     
+    Invoke CloseHandle, hSiaPasswordFile
     mov eax, TRUE
     ret
 Sia_FindApiPassword ENDP

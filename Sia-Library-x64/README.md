@@ -1,4 +1,4 @@
-# ![](./assets/sialogo.png) Sia Library
+# ![](../assets/sialogo.png) Sia Library
 
 Sia Library - a library written in assembler (for x86 and x64) for accessing Sia rpc api endpoints.
 

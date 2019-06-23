@@ -77,6 +77,7 @@ sia_api_renter_recoveryscan     PROTO :DWORD,:DWORD                             
 sia_api_renter_rename           PROTO :DWORD                                    ; hSia
 sia_api_renter_stream           PROTO :DWORD                                    ; hSia
 sia_api_renter_upload           PROTO :DWORD                                    ; hSia
+sia_api_renter_uploadstream     PROTO :DWORD,:DWORD,:DWORD                      ; hSia, pStream, dwStreamSize
 
 sia_api_tpool_confirmed         PROTO :DWORD,:DWORD                             ; hSia, lpdwcJSONObject
 sia_api_tpool_fee               PROTO :DWORD,:DWORD                             ; hSia, lpdwcJSONObject
@@ -170,6 +171,7 @@ SIA_API_URL_RENTER_RECOVERYSCAN                 DB "/renter/recoveryscan",0     
 SIA_API_URL_RENTER_RENAME                       DB "/renter/rename/",0                      ; <siapath> GET, POST
 SIA_API_URL_RENTER_STREAM                       DB "/renter/stream/",0                      ; <siapath> GET
 SIA_API_URL_RENTER_UPLOAD                       DB "/renter/upload/",0                      ; <siapath> POST
+SIA_API_URL_RENTER_UPLOADSTREAM                 DB "/renter/uploadstream/",0                ; <siapath> POST
 
 SIA_API_URL_TPOOL_CONFIRMED                     DB "/tpool/confirmed/",0                    ; <id> GET
 SIA_API_URL_TPOOL_FEE                           DB "/tpool/fee",0                           ; GET
@@ -890,9 +892,18 @@ sia_api_renter_stream ENDP
 ; https://sia.tech/docs/#renter-upload-siapath-post
 ;------------------------------------------------------------------------------
 sia_api_renter_upload PROC hSia:DWORD
-    Invoke SIA_RPC_POST, hSia, Addr SIA_API_URL_RENTER_RENAME, NULL, NULL, NULL, NULL
+    Invoke SIA_RPC_POST, hSia, Addr SIA_API_URL_RENTER_UPLOAD, NULL, NULL, NULL, NULL
     ret
 sia_api_renter_upload ENDP
+
+;------------------------------------------------------------------------------
+; uploads a file to the network from the local filesystem:
+; https://sia.tech/docs/#renter-upload-siapath-post
+;------------------------------------------------------------------------------
+sia_api_renter_uploadstream PROC hSia:DWORD, pStream:DWORD, dwStreamSize:DWORD
+    Invoke SIA_RPC_POST, hSia, Addr SIA_API_URL_RENTER_UPLOADSTREAM, pStream, dwStreamSize, NULL, NULL
+    ret
+sia_api_renter_uploadstream ENDP
 
 
 ;### Transaction Pool ###
